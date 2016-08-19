@@ -45,7 +45,7 @@ loader.initialize = function(config, thinky)
                 caseSensitive: true
             });
 
-            definitions = _.mapValues(definitions, (d) => d.call(loader));
+            definitions = _.mapValues(definitions, (d) => d.default.call(loader));
 
             _.each(definitions, function createModels(definition)
             {
