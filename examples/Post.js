@@ -4,28 +4,24 @@
  * @description :: Example of a blog post model file.
  */
 
+export default class {
+  constructor(loader) {
+    let type = loader.thinky.type;
 
-module.exports = function()
-{
-    let thinky = this.thinky;
-    let type   = this.thinky.type;
-    let models = this.models;
-
-    return {
-
-        tableName: "Post",
-        schema: {
-            id: type.string(),
-            title: type.string(),
-            content: type.string(),
-            idAuthor: type.string()
-        },
-
-
-        // set up any relationships, indexes or function definitions here
-        init: function(model) {
-            model.belongsTo(models.Author, "author", "idAuthor", "id");
-        }
-
+    this.tableName = 'Post';
+    this.schema = {
+      id: type.string(),
+      title: type.string(),
+      content: type.string(),
+      authorId: type.string()
     };
-};
+
+    this.options = {};
+  }
+
+  initialize(loader, model) {
+    let models = loader.models;
+
+    model.belongsTo(models.Author, 'author', 'authorId', 'id');
+  }
+}

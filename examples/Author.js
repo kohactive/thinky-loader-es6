@@ -4,25 +4,23 @@
  * @description :: Example of a blog post author model file.
  */
 
-module.exports = function()
-{
-    let thinky = this.thinky;
-    let type   = this.thinky.type;
-    let models = this.models;
+export default class {
+  constructor(loader) {
+    let type = loader.thinky.type;
 
-    return {
-
-	    tableName: "Author", 
-	    schema: {
-	        id: type.string(),
-	        sold: type.number(),
-	        userId: type.string()
-	    },
-	    options: {},
-
-
-	    // set up any relationships, indexes or function definitions here
-	    init: function(model) {}
-
+    this.tableName = 'Author';
+    this.schema = {
+      id: type.string(),
+      sold: type.number(),
+      userId: type.string()
     };
-};
+
+    this.options = {};
+  }
+
+  initialize(loader, model) {
+    let models = loader.models;
+
+    model.hasMany(models.Post, 'posts', 'id', 'authorId');
+  }
+}

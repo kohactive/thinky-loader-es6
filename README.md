@@ -1,13 +1,17 @@
-# thinky-loader
-A general purpose model loader for Thinky ORM for RethinkDB. _See also migrating from sails-hook-thinky section below._ 
+# thinky-loader-es6
+An ES6-compatible model loader for Thinky ORM for RethinkDB.
 
 ## Why
+
+This is a refactor of `thinky-loader` to support defining Thinky models as ES6 classes.
+
+From `thinky-loader`'s README:
 
 Rethinkdb is awesome and Thinky is a great ORM for it. But loading multiple model definition files and making them available in a large distributed Node.js applicaiton could be better. 
 
 ## Installation
 
-`npm install thinky-loader`
+`npm install thinky-loader-es6`
 
 or add to `package.json`
 
@@ -19,7 +23,7 @@ or add to `package.json`
 
 _In a controller, for example:_
 ```javascript
-let orm = require('thinky-loader');
+let orm = require('thinky-loader-es6');
 
 // Post has been loaded and can be referenced at orm.models
 orm.models.Post.getJoin().then(function(posts) {
@@ -69,56 +73,37 @@ orm.initialize(ormConfig) // you can also optionally pass an instance of thinky:
 
 
 
-## Model file configuration  
-Create a file for each thinky model with the contents below. The model definition should mirror the same schema definition format you would normally use in thinky.
+## Model file configuration
+Create a file for each thinky model with the contents below. The model definition should be similar to the schema definition format you would normally use in thinky.
 
 ```javascript
-module.exports = function()
-{
-    let thinky = this.thinky; // access to thinky instance
-    let type   = this.thinky.type; // access to thinky type
-    let models = this.models; // access to other models (for creating relationships)
+export default class {
+  constructor(loader) {
+    let type = loader.thinky.type;
 
-    return {
-
-        tableName: "Car",
-        schema: {
-            id: type.string(),
-            type: type.string(),
-            year: type.string(),
-            idOwner: type.string()
-        },
-        options  : {
-            enforce_extra: "none"
-        },
-
-
-        // set up any relationships, indexes or function definitions here
-        init: function(model) {
-            model.belongsTo(models.Person, "owner", "idOwner", "id"); // note the reference to another model `Person`
-            
-            model.ensureIndex("type");
-            
-            model.define("isDomestic", function() {
-                return this.type === 'Ford' || this.type === 'GM';
-            });
-        }
-
+    this.tableName = "Car";
+    this.schema = {
+      id: type.string(),
+      type: type.string(),
+      year: type.number(),
+      ownerId: type.string()
     };
-};
+
+    this.options = {
+      enforce_extra: "none"
+    }
+  }
+
+  initialize(loader, model) {
+    let models = loader.models;
+
+    model.belongsTo(models.Person, 'owner', 'ownerId', 'id');
+    model.ensureIndex('type');
+
+    model.define('isDomestic', function() {
+      return this.type === 'Ford' || this.type === 'GM';
+    });
+  }
+}
 ```
 *Also see `examples` directory for sample model files.
-
-
-## Migrating from [sails-hook-thinky](https://github.com/mwielbut/sails-hook-thinky)
-
-`thinky-loader` is the recommended replacement for `sails-hook-thinky`. It provides a standard loader for Sailsjs and non-Sailsjs projects and removes the use of global variables the are common within Sailsjs.
-
-Anyone using sails-hook-thinky can perform the following steps to migrate over:
-
-1. Remove `sails-hook-thinky` and add `thinky-loader` in your `package.json`
-2. Make sure `thinky` is in your `package.json`
-3. Update your thinky configuration with the example configuration above
-4. Add `orm.initialize(ormConfig)` to your `bootstrap.js` file. This loader will no longer load automatically on startup like a hook. This is really for the best...
-5. Update your model definition files to the new format
-6. Models and thinky are no longer available as global variabels. You'll need to add `let orm = require('thinky-loader');` to any file the requires orm access and reference your model instances directly via `orm.models.<NAME>`.
