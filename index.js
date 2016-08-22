@@ -1,83 +1,69 @@
 "use strict";
 
-
-/**
- * Thinky Loader
- *
- * @mwielbut
- */
-
-
-let _ = require('lodash');
-let Thinky = require('thinky');
-let requireAll = require('require-all');
+const _ = require('lodash');
+const Thinky = require('thinky');
+const requireAll = require('require-all');
 
 let loader = {
-    thinky: null,
-    models:
-    {}
+  thinky: null,
+  models: {}
 };
 
-loader.initialize = function(config, thinky)
-{
-    loader.thinky = thinky || new Thinky(config.thinky.rethinkdb);
+loader.initialize = (config, thinky) => {
+  loader.thinky = thinky || new Thinky(config.thinky.rethinkdb);
 
-    return loader
-        .thinky
-        .dbReady()
-        .then(function()
-        {
-            if (config.debug)
-            {
-                console.dir("DB Ready");
-            }
+  // This will return a promise
+  return loader.thinky.dbReady().then(() => {
+    if (config.debug) {
+      console.dir("DB Ready");
+    }
 
-            if (config.debug)
-            {
-                console.dir("Loading models from path: " + config.modelsPath);
-            }
+    if (config.debug) {
+      console.dir("Loading models from path: " + config.modelsPath);
+    }
 
-            let definitions = requireAll(
-            {
-                dirname: config.modelsPath,
-                filter: /(.+)\.(js)$/,
-                depth: 1,
-                caseSensitive: true
-            });
+    // Loads all modules from the models directory specified when the loader
+    // is initialized
+    let definitions = requireAll({
+      dirname: config.modelsPath,
+      filter: /(.+)\.(js)$/,
+      depth: 1,
+      caseSensitive: true
+    });
 
-            definitions = _.mapValues(definitions, (d) => d.default.call(loader));
+    // Maps all classes loaded into an object
+    definitions = _.mapValues(definitions, (d) => {
+      let DefinitionModel = d.default;
+      return new DefinitionModel(loader);
+    });
 
-            _.each(definitions, function createModels(definition)
-            {
-                var modelId = definition.tableName || definition.globalId;
+    // Loop over each class and create the corresponding model
+    _.each(definitions, (definition) => {
+      let modelId = definition.tableName || definition.globalId;
 
-                if (config.debug)
-                {
-                    console.dir("Creating model id: " + modelId);
-                }
+      if (config.debug) {
+        console.dir("Creating model id: " + modelId);
+      }
 
-                var model = loader.thinky.createModel(modelId, definition.schema, definition.options);
+      let model = loader.thinky.createModel(modelId, definition.schema, definition.options);
+      loader.models[modelId] = model;
+    });
 
-                loader.models[modelId] = model;
-            });
+    // Loop over each class and run the initialize method, usually to set up
+    // relationships or hooks
+    _.each(definitions, (definition) => {
+      let modelId = definition.tableName || definition.globalId;
 
-            // call the init funciton on each def to set up relationships
-            _.each(definitions, function initModel(definition)
-            {
-                var modelId = definition.tableName || definition.globalId;
+      if (config.debug) {
+        console.dir("Initializing model id: " + modelId);
+      }
 
-                if (config.debug)
-                {
-                    console.dir("Initializing model id: " + modelId);
-                }
+      let model = loader.models[modelId];
+      definition.initialize(loader, model);
+    });
 
-                var model = loader.models[modelId];
-
-                definition.init(model);
-            });
-
-            return loader;
-        });
+    return loader;
+  });
 
 };
 

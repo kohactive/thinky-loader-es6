@@ -1,22 +1,22 @@
 {
-  "name": "thinky-loader",
-  "version": "0.0.4",
+  "name": "thinky-loader-es6",
+  "version": "0.0.1",
   "description": "A general purpose model loader for Thinky ORM for RethinkDB.",
   "main": "index.js",
-  "author": "mwielbut",
+  "author": "kohactive",
   "dependencies": {
     "lodash": "4.3.0",
     "require-all": "2.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mwielbut/thinky-loader.git"
+    "url": "git://github.com/kohactive/thinky-loader-es6.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mwielbut/thinky-loader/issues"
+    "url": "https://github.com/kohactive/thinky-loader-es6/issues"
   },
-  "homepage": "https://github.com/mwielbut/thinky-loader",
+  "homepage": "https://github.com/kohactive/thinky-loader-es6",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
