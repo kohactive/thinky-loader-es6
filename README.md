@@ -46,7 +46,7 @@ It is recommended that you carve out a directory for your thinky model definitio
 
 _In a bootstapping or initialization file (could be your `app.js`!):_
 ```javascript
-let orm = require('thinky-loader');
+let orm = require('thinky-loader-es6');
 
 let ormConfig = {
                 debug     : false, 
