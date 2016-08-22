@@ -4,7 +4,7 @@
  * @description :: Example controller to demonstrate calling thinky model.
  */
 
-let orm = require('thinky-loader');
+let orm = require('thinky-loader-es6');
 
 module.exports = {
 
