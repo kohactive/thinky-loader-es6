@@ -51,6 +51,7 @@ let orm = require('thinky-loader-es6');
 let ormConfig = {
                 debug     : false, 
                 modelsPath: 'data-models/thinky',
+                ignoreModels: ['base'],
                 thinky    : {
                         rethinkdb: {
                                 host        : 'db-0',

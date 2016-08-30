@@ -31,8 +31,16 @@ loader.initialize = (config, thinky) => {
       caseSensitive: true
     });
 
+    // Delete ignored models from the object store
+    let ignoreModels = config.ignoreModels;
+
+    if (ignoreModels && ignoreModels.length) {
+      ignoreModels.map(m => delete definitions[m]);
+    }
+
     // Maps all classes loaded into an object
     definitions = _.mapValues(definitions, (d) => {
+
       let DefinitionModel = d.default;
       return new DefinitionModel(loader);
     });
